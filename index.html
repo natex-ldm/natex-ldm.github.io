@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NaTex | Seamless Texture Generation as Latent Color Diffusion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg: #ffffff;
+            --surface: #f7f9fc;
+            --muted: #6b7280;
+            --text: #0f172a;
+            --primary: #0ea5ff;
+            /* cyan-400 */
+            --primary-600: #0284c7;
+            --accent: #7c3aed;
+            /* purple-600 */
+            --glass: rgba(15, 23, 42, 0.04);
+            --card-border: rgba(15, 23, 42, 0.06);
+        }
+
+        html,
+        body {
+            height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            scroll-behavior: smooth;
+        }
+
+        /* Light theme cards */
+        .model-card {
+            background: linear-gradient(180deg, var(--surface) 0%, #ffffff 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            transition: all 0.35s cubic-bezier(.2, .9, .3, 1);
+            box-shadow: 0 6px 18px rgba(12, 17, 25, 0.06);
+        }
+
+        .model-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 18px 40px rgba(12, 17, 25, 0.08);
+            border-color: rgba(14, 165, 255, 0.14);
+        }
+
+        .nav-bar {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(6px);
+            border-bottom: 1px solid rgba(12, 17, 25, 0.06);
+        }
+
+        .btn-solid {
+            background: linear-gradient(90deg, var(--primary), var(--primary-600));
+            color: white;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-weight: 600;
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            box-shadow: 0 6px 18px rgba(14, 165, 255, 0.12);
+            transition: transform .18s ease, box-shadow .18s ease;
+        }
+
+        .btn-solid:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(14, 165, 255, 0.14);
+        }
+
+        .btn-outline {
+            border: 1px solid rgba(12, 17, 25, 0.08);
+            background: transparent;
+            color: var(--text);
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+
+        .hero {
+            background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+        }
+
+        .neon-text {
+            /* substitute neon with subtle accent */
+            color: var(--text);
+        }
+
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, rgba(12, 17, 25, 0) 0%, rgba(12, 17, 25, 0.06) 50%, rgba(12, 17, 25, 0) 100%);
+        }
+
+        .model-viewport {
+            border-radius: 10px;
+            border: 1px solid rgba(12, 17, 25, 0.06);
+            background: linear-gradient(180deg, #ffffff, #fbfdff);
+            overflow: hidden;
+        }
+
+        .feature-tab {
+            border: 1px solid rgba(12, 17, 25, 0.06);
+            padding: 10px 18px;
+            border-radius: 999px;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .feature-tab.active {
+            background: linear-gradient(90deg, var(--primary), var(--primary-600));
+            color: white;
+            box-shadow: 0 8px 24px rgba(14, 165, 255, 0.08);
+        }
+
+        .case-selector {
+            border: 1px solid rgba(12, 17, 25, 0.06);
+            border-radius: 8px;
+            padding: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all .18s ease;
+        }
+
+        .case-selector:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(12, 17, 25, 0.06);
+            border-color: rgba(14, 165, 255, 0.12);
+        }
+
+        .curve-container {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid rgba(12, 17, 25, 0.06);
+        }
+
+        .curve-points circle {
+            transition: r .18s ease, transform .18s ease;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(12, 17, 25, 0.6);
+            z-index: 60;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: min(1100px, 96%);
+            height: 720px;
+            overflow: hidden;
+            border: 1px solid rgba(12, 17, 25, 0.06);
+            box-shadow: 0 30px 80px rgba(12, 17, 25, 0.12);
+            margin: 2rem auto;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 20px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--muted);
+        }
+
+        /* responsive tweaks */
+        @media (max-width:1024px) {
+            .model-viewport.h-[700px] {
+                height: 520px;
+            }
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+    <!-- NAV -->
+    <nav class="nav-bar fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center space-x-6">
+                    <div class="hidden md:flex space-x-6">
+                        <a href="#" class="text-sm font-medium transition-all duration-300">NaTex</a>
+                        <a href="https://lattice3d.github.io/"
+                            class="text-gray-400 text-sm font-medium transition-all duration-300 hover:text-slate-900">LATTICE</a>
+                        <a href="#"
+                            class="text-gray-400 text-sm font-medium transition-all duration-300 hover:text-slate-900">FlashVDM</a>
+                    </div>
+
+                    <!-- <a href="#" class="text-lg font-bold text-slate-900">NaTex</a>
+                    <div class="hidden md:flex items-center space-x-4">
+                        <a href="#overview" class="text-sm text-slate-600 hover:text-slate-900">Overview</a>
+                        <a href="#features" class="text-sm text-slate-600 hover:text-slate-900">Features</a>
+                        <a href="#models" class="text-sm text-slate-600 hover:text-slate-900">Gallery</a>
+                    </div> -->
+                </div>
+
+                <!-- <div class="flex items-center space-x-3">
+                    <a href="#get-started" class="btn-outline hidden sm:inline">Docs</a>
+                    <a href="https://github.com/lattice3d" target="_blank" class="btn-outline hidden sm:inline">
+                        <i class="fab fa-github mr-2"></i> GitHub
+                    </a>
+                    <button class="btn-solid"
+                        onclick="document.getElementById('get-started').scrollIntoView({behavior:'smooth'})">
+                        Try NaTex
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div> -->
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- HERO -->
+    <section id="overview" class="hero pt-32 pb-24 px-6">
+        <div class="max-w-6xl mx-auto px-6 text-center fade-in">
+            <span class="text-sm text-slate-500 tracking-wide">INTRODUCING</span>
+            <h1 class="text-5xl md:text-6xl font-extrabold mt-4 neon-text">NaTex</h1>
+            <p class="mt-4 text-xl text-slate-700 max-w-3xl mx-auto">
+                Seamless Texture Generation as <strong>Latent Color Diffusion</strong>
+            </p>
+            <!-- <p class="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+                 Seamless Texture Generation as <strong>Latent Color Diffusion</strong>
+            </p> -->
+
+            <div class="mt-6 text-slate-600">
+                <p>Native Texture Synthesis.</p>
+            </div>
+
+            <!-- Authors -->
+            <div class="mt-8 text-sm text-slate-600">
+                <p class="inline-block">
+                    Zeqiang Lai<sup>1,2★</sup>, Yunfei Zhao<sup>2★</sup>,
+                    Zibo Zhao<sup>2</sup>, Xin Yang<sup>2</sup><br>
+                    Xin Huang<sup>2</sup>, Jingwei Huang<sup>2</sup>,
+                    Chunchao Guo<sup>2†</sup>, Xiangyu Yue<sup>1†</sup>
+                </p>
+
+                <p class="mt-2 text-slate-500"><sup>1</sup>MMLab, CUHK &nbsp; · &nbsp; <sup>2</sup>Tencent Hunyuan</p>
+            </div>
+
+            <!-- Buttons -->
+            <div class="mt-10 flex flex-wrap justify-center gap-4">
+                <a href="#" class="btn-outline">Technical Report</a>
+                <a href="https://github.com/lattice3d" target="_blank" class="btn-outline flex items-center">
+                    <i class="fab fa-github mr-2"></i> GitHub
+                </a>
+                <a href="#models" class="btn-solid">Browse Gallery</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- TEASER SECTION -->
+    <section id="teaser" class="py-20 bg-white ">
+        <div class="max-w-6xl mx-auto text-center px-10">
+            <div class="mb-12 fade-in">
+                <h2 class="text-xl font-bold mb-4">Meet Next-Generation Texture Generation</h2>
+                <p class="max-w-2xl text-gray-500 mx-auto">
+                    Generate coherent, seamless materials and textures directly in 3D space.
+                </p>
+            </div>
+
+            <div class="relative rounded-xl overflow-hidden">
+                <!-- Replace with teaser video or 3D viewer -->
+                <img src="statics/images/teaser.jpg" alt="NaTex teaser" class="w-full h-auto object-cover">
+
+                <!-- Optional overlay text -->
+                <div class="absolute bottom-6 left-6 text-left">
+                    <h3 class="text-white text-2xl font-semibold mb-1">Latent Color Diffusion</h3>
+                    <p class="text-white text-sm">Consistent, seamless textures across complex geometry.</p>
+                </div>
+            </div>
+
+
+        </div>
+    </section>
+
+
+    <!-- CTA -->
+    <section id="get-started" class="py-20">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <h2 class="text-2xl font-bold mb-4">Ready to try NaTex?</h2>
+            <p class="text-slate-600 mb-8">Integrate NaTex into your asset pipeline.</p>
+            <div class="flex justify-center gap-4">
+                <a href="#" class="btn-solid">Get Started</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal (detail view) -->
+    <div id="model-modal" class="modal" aria-hidden="true">
+        <div class="modal-content p-6 relative">
+            <button class="close-modal" id="close-modal">&times;</button>
+            <div class="flex h-full gap-6">
+                <div class="w-3/4 h-full flex flex-col gap-4">
+                    <div class="model-viewport flex-grow">
+                        <model-viewer id="modal-viewer" camera-controls auto-rotate shadow-intensity="0.0"
+                            exposure="0.5" environment-image="neutral"
+                            style="width:100%;height:100%;background-color:transparent"></model-viewer>
+                    </div>
+                </div>
+                <div class="w-1/4 h-full flex flex-col gap-4">
+                    <div class="reference-image-container" style="height:40%;">
+                        <img id="reference-image" src="" alt="Reference"
+                            class="w-full h-full object-contain rounded-lg" />
+                    </div>
+                    <div class="model-details">
+                        <h2 id="modal-title" class="text-xl font-bold mb-2"></h2>
+                        <p id="modal-description" class="text-slate-600 text-sm"></p>
+
+                        <div class="mt-4 grid grid-cols-1 gap-2 text-xs text-slate-600">
+                            <div>
+                                <p class="text-slate-400">Category</p>
+                                <p id="modal-category" class="text-slate-800"></p>
+                            </div>
+                            <div>
+                                <p class="text-slate-400">Atlas</p>
+                                <p id="modal-polygons" class="text-slate-800"></p>
+                            </div>
+                            <div>
+                                <p class="text-slate-400">Materials</p>
+                                <p id="modal-textures" class="text-slate-800"></p>
+                            </div>
+                        </div>
+
+                        <button class="w-full btn-solid mt-6">Download</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="statics/js/model_zoo.js"></script>
+    <script src="statics/js/zoo.js"></script>
+    <!-- scripts -->
+    <script>
+        // Simple tabs
+        document.querySelectorAll('.feature-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.feature-tab').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const tab = btn.getAttribute('data-tab');
+                document.querySelectorAll('.tab-content').forEach(tc => {
+                    if (tc.dataset.tab === tab) {
+                        tc.classList.remove('hidden');
+                    } else {
+                        tc.classList.add('hidden');
+                    }
+                });
+            });
+        });
+
+        // Clickable case selectors to load a placeholder into model-viewer
+        document.querySelectorAll('.case-selector').forEach(cs => {
+            cs.addEventListener('click', () => {
+                const model = cs.dataset.model || '';
+                const viewer = document.getElementById('feature-viewer');
+                // put your model path mapping here
+                const mapping = {
+                    'angel': 'statics/meshes/angel.glb',
+                    'fabric': 'statics/meshes/fabric.glb',
+                    'metal': 'statics/meshes/metal.glb'
+                };
+                if (mapping[model]) viewer.setAttribute('src', mapping[model]);
+            });
+        });
+
+        // curve point click -> load model
+        document.querySelectorAll('.curve-points circle').forEach(c => {
+            c.style.cursor = 'pointer';
+            c.addEventListener('click', () => {
+                const id = c.dataset.model;
+                const mapping = {
+                    'm1': 'statics/meshes/low.glb',
+                    'm2': 'statics/meshes/med.glb',
+                    'm3': 'statics/meshes/high.glb',
+                    'm4': 'statics/meshes/ultra.glb'
+                };
+                const mv = document.getElementById('scaling-viewer');
+                if (mapping[id]) mv.setAttribute('src', mapping[id]);
+            });
+        });
+
+        // modal open/close (example)
+        document.querySelectorAll('#model-grid .model-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const modal = document.getElementById('model-modal');
+                modal.classList.add('open');
+                modal.setAttribute('aria-hidden', 'false');
+                // set preview content if needed
+            });
+        });
+        document.getElementById('close-modal').addEventListener('click', () => {
+            const modal = document.getElementById('model-modal');
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+        });
+
+        // pagination placeholders
+        let currentPage = 1, totalPages = 1;
+        document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+        document.getElementById('prev-page').addEventListener('click', () => {
+            if (currentPage > 1) currentPage--;
+            document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+        });
+        document.getElementById('next-page').addEventListener('click', () => {
+            if (currentPage < totalPages) currentPage++;
+            document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+        });
+
+        // basic view-mode switching in modal
+        document.querySelectorAll('.view-mode').forEach(vm => {
+            vm.addEventListener('click', () => {
+                document.querySelectorAll('.view-mode').forEach(x => x.classList.remove('active'));
+                vm.classList.add('active');
+                // implement mode switching (albedo/normal/textured) if you have separate glb or material variants
+            });
+        });
+
+    </script>
+</body>
+
+</html>
