@@ -1,0 +1,146 @@
+<!-- FEATURES -->
+<section id="features" class="py-16">
+    <div class="max-w-6xl mx-auto px-6">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold">Core Capabilities</h2>
+            <p class="text-slate-600 mt-2">NaTex specializes in coherent, high-resolution texture synthesis for 3D
+                assets.</p>
+        </div>
+
+        <div class="flex justify-center mb-8 gap-4">
+            <button class="feature-tab active" data-tab="color">Texture Generation</button>
+            <button class="feature-tab" data-tab="seam">Material Generation</button>
+            <button class="feature-tab" data-tab="fast">Part Segmentation</button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-8">
+            <!-- left -->
+            <div class="space-y-6">
+                <div class="tab-content" data-tab="color">
+                    <h3 class="text-xl font-semibold">Latent Color Diffusion</h3>
+                    <p class="text-slate-600">Operate in a compact latent color space to produce consistent,
+                        detailed texture maps with fewer iterations.</p>
+
+                    <div class="mt-4 space-y-3">
+                        <div class="case-selector" data-model="angel">
+                            <h4 class="font-medium">Stylized Character</h4>
+                            <p class="text-slate-500 text-sm">High-frequency color details, 4k texture</p>
+                        </div>
+                        <div class="case-selector" data-model="fabric">
+                            <h4 class="font-medium">Fabric Patterns</h4>
+                            <p class="text-slate-500 text-sm">Seamless tiling, anisotropic details</p>
+                        </div>
+                        <div class="case-selector" data-model="metal">
+                            <h4 class="font-medium">PBR Metallic</h4>
+                            <p class="text-slate-500 text-sm">Metalness + roughness-aware color synthesis</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content hidden" data-tab="seam">
+                    <h3 class="text-xl font-semibold">Seamless Atlas Generation</h3>
+                    <p class="text-slate-600">Automatic UV-aware generation to avoid visible seams across different
+                        UV charts.</p>
+                </div>
+
+                <div class="tab-content hidden" data-tab="fast">
+                    <h3 class="text-xl font-semibold">Fast Inference</h3>
+                    <p class="text-slate-600">Optimized forward pass for near real-time texture generation at
+                        moderate resolutions.</p>
+                </div>
+            </div>
+
+            <!-- right -->
+            <div class="model-viewport h-[560px] rounded-xl p-2">
+                <model-viewer id="feature-viewer" camera-controls shadow-intensity="1.2" exposure="1.0"
+                    interaction-prompt="none" environment-image="neutral" disable-zoom touch-action="pan-y"
+                    style="width:100%;height:100%;background-color:#f3f7fb;">
+                    <!-- if you have a default model, put src here -->
+                </model-viewer>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- MODELS / GALLERY -->
+<section id="models" class="py-16 bg-gray-50">
+    <div class="max-w-6xl mx-auto px-6">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold">Generated Textured Assets</h2>
+            <p class="text-slate-600 mt-2">Browse synthesized textured assets by NaTex.</p>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-3 mb-8">
+            <button class="filter-btn px-4 py-2 rounded-full border border-gray-200 text-sm text-slate-700"
+                data-filter="all">All</button>
+            <button class="filter-btn px-4 py-2 rounded-full border border-gray-200 text-sm text-slate-700"
+                data-filter="characters">Characters</button>
+            <button class="filter-btn px-4 py-2 rounded-full border border-gray-200 text-sm text-slate-700"
+                data-filter="props">Props</button>
+            <button class="filter-btn px-4 py-2 rounded-full border border-gray-200 text-sm text-slate-700"
+                data-filter="materials">Materials</button>
+            <button class="filter-btn px-4 py-2 rounded-full border border-gray-200 text-sm text-slate-700 active"
+                data-filter="textured">Textured</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="model-grid">
+            <!-- placeholder cards -->
+            <div class="model-card p-4">
+                <div class="aspect-[16/9] bg-white rounded-md overflow-hidden mb-3">
+                    <img src="statics/thumbs/tex1.png" alt="tex1" class="w-full h-full object-cover" />
+                </div>
+                <h4 class="font-medium">Stylized Helmet</h4>
+                <p class="text-sm text-slate-500">4k Atlas · PBR</p>
+            </div>
+
+            <div class="model-card p-4">
+                <div class="aspect-[16/9] bg-white rounded-md overflow-hidden mb-3">
+                    <img src="statics/thumbs/tex2.png" alt="tex2" class="w-full h-full object-cover" />
+                </div>
+                <h4 class="font-medium">Denim Fabric</h4>
+                <p class="text-sm text-slate-500">Seamless Tile</p>
+            </div>
+
+            <div class="model-card p-4">
+                <div class="aspect-[16/9] bg-white rounded-md overflow-hidden mb-3">
+                    <img src="statics/thumbs/tex3.png" alt="tex3" class="w-full h-full object-cover" />
+                </div>
+                <h4 class="font-medium">Ceramic Glaze</h4>
+                <p class="text-sm text-slate-500">Specular Variation</p>
+            </div>
+
+            <div class="model-card p-4">
+                <div class="aspect-[16/9] bg-white rounded-md overflow-hidden mb-3">
+                    <img src="statics/thumbs/tex4.png" alt="tex4" class="w-full h-full object-cover" />
+                </div>
+                <h4 class="font-medium">Wood Panel</h4>
+                <p class="text-sm text-slate-500">High-frequency grain</p>
+            </div>
+        </div>
+
+        <!-- pagination -->
+        <div class="flex justify-center items-center gap-4 mt-8">
+            <button id="prev-page"
+                class="px-4 py-2 rounded-full border border-gray-200 text-sm text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas fa-chevron-left mr-2"></i> Previous
+            </button>
+            <span class="text-slate-600 text-sm" id="page-info">Page 1 of 1</span>
+            <button id="next-page" class="px-4 py-2 rounded-full border border-gray-200 text-sm text-slate-700">Next
+                <i class="fas fa-chevron-right ml-2"></i></button>
+        </div>
+    </div>
+</section>
+
+
+<!-- CTA -->
+<section id="get-started" class="py-20">
+    <div class="max-w-4xl mx-auto px-6 text-center">
+        <h2 class="text-2xl font-bold mb-4">Ready to try NaTex?</h2>
+        <p class="text-slate-600 mb-8">Integrate NaTex into your asset pipeline or try online demos.</p>
+        <div class="flex justify-center gap-4">
+            <a href="#" class="btn-solid">Get Started</a>
+            <a href="#" class="btn-outline">Contact</a>
+        </div>
+    </div>
+</section>

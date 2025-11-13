@@ -8,7 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
+    <!-- 单独引入 Academicons（仅包含学术图标） -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/academicons/1.9.4/css/academicons.min.css">
     <!-- Favicon and App Icons -->
     <link rel="icon" type="image/png" sizes="16x16" href="statics/favicon_io/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="statics/favicon_io/favicon-32x32.png">
@@ -32,6 +33,22 @@
             /* purple-600 */
             --glass: rgba(15, 23, 42, 0.04);
             --card-border: rgba(15, 23, 42, 0.06);
+            --mvd-red: #ef4444;
+            /* 红色标识MVD */
+            --natex-blue: #0ea5ff;
+            /* 蓝色标识NaTex */
+            --vae-purple: #7c3aed;
+            /* VAE 主题色 */
+            --dit-cyan: #06b6d4;
+            /* DiT 主题色 */
+            --app-material: #10b981;
+            /* Material Generation 主题色 */
+            --app-refinement: #f59e0b;
+            /* Texture Refinement 主题色 */
+            --app-segmentation: #ec4899;
+            /* Part Segmentation 主题色 */
+            --app-part-texturing: #3b82f6;
+            /* Part Texturing 主题色 */
         }
 
         html,
@@ -114,18 +131,96 @@
             overflow: hidden;
         }
 
-        .feature-tab {
+        .challenge-tab {
             border: 1px solid rgba(12, 17, 25, 0.06);
             padding: 10px 18px;
             border-radius: 999px;
             background: transparent;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        .feature-tab.active {
+        .challenge-tab.active {
             background: linear-gradient(90deg, var(--primary), var(--primary-600));
             color: white;
             box-shadow: 0 8px 24px rgba(14, 165, 255, 0.08);
+        }
+
+        /* Architecture Tab Styles */
+        .arch-tab {
+            border: 1px solid rgba(12, 17, 25, 0.06);
+            padding: 12px 24px;
+            border-radius: 999px;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .arch-tab.active.vae-tab {
+            background: linear-gradient(90deg, var(--vae-purple), #6d28d9);
+            color: white;
+            box-shadow: 0 8px 24px rgba(124, 58, 237, 0.12);
+            border-color: transparent;
+        }
+
+        .arch-tab.active.dit-tab {
+            background: linear-gradient(90deg, var(--dit-cyan), #0891b2);
+            color: white;
+            box-shadow: 0 8px 24px rgba(6, 182, 212, 0.12);
+            border-color: transparent;
+        }
+
+        .arch-tab:hover:not(.active) {
+            border-color: rgba(12, 17, 25, 0.12);
+            background: rgba(12, 17, 25, 0.02);
+        }
+
+        /* Application Tab Styles */
+        .app-tab {
+            border: 1px solid rgba(12, 17, 25, 0.06);
+            padding: 12px 20px;
+            border-radius: 999px;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 1rem;
+            white-space: nowrap;
+        }
+
+        .app-tab.active.material-tab {
+            background: linear-gradient(90deg, var(--app-material), #059669);
+            color: white;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.12);
+            border-color: transparent;
+        }
+
+        .app-tab.active.refinement-tab {
+            background: linear-gradient(90deg, var(--app-refinement), #d97706);
+            color: white;
+            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.12);
+            border-color: transparent;
+        }
+
+        .app-tab.active.segmentation-tab {
+            background: linear-gradient(90deg, var(--app-segmentation), #be185d);
+            color: white;
+            box-shadow: 0 8px 24px rgba(236, 72, 153, 0.12);
+            border-color: transparent;
+        }
+
+        .app-tab.active.part-texturing-tab {
+            background: linear-gradient(90deg, var(--app-part-texturing), #2563eb);
+            color: white;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.12);
+            border-color: transparent;
+        }
+
+        .app-tab:hover:not(.active) {
+            border-color: rgba(12, 17, 25, 0.12);
+            background: rgba(12, 17, 25, 0.02);
         }
 
         .case-selector {
@@ -191,10 +286,537 @@
             color: var(--muted);
         }
 
+        /* Challenge specific styles */
+        .challenge-content {
+            display: none;
+        }
+
+        .challenge-content.active {
+            display: block;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .method-card {
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .method-card.mvd {
+            border: 2px solid var(--mvd-red);
+        }
+
+        .method-card.natex {
+            border: 2px solid var(--natex-blue);
+        }
+
+        .method-header {
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .method-header.mvd {
+            background-color: var(--mvd-red);
+            color: white;
+        }
+
+        .method-header.natex {
+            background-color: var(--natex-blue);
+            color: white;
+        }
+
+        .method-image {
+            width: 100%;
+            /* height: 300px; */
+            padding: 1rem;
+            object-fit: cover;
+            background: #f3f4f6;
+        }
+
+        .method-caption {
+            padding: 1rem;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .challenge-description {
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            text-align: center;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Architecture Section Styles */
+        .architecture-section {
+            background: var(--surface);
+            padding: 24px 0;
+        }
+
+        .architecture-title {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            color: var(--text);
+        }
+
+        .arch-tabs-container {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .arch-content {
+            display: none;
+            /* max-width: 1000px; */
+            margin: 0;
+            padding: 0;
+        }
+
+        .arch-content.active {
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+        }
+
+        .arch-text {
+            flex: 1;
+            color: var(--text);
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+
+        .arch-text h3 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .arch-text.vae-text h3 {
+            color: var(--vae-purple);
+        }
+
+        .arch-text.dit-text h3 {
+            color: var(--dit-cyan);
+        }
+
+        .arch-image-container {
+            flex: 1;
+            min-width: 350px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 24px rgba(12, 17, 25, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .arch-image-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(12, 17, 25, 0.1);
+        }
+
+        .arch-image {
+            width: 100%;
+            object-fit: contain;
+            background: white;
+            padding: 2rem;
+        }
+
+        /* Performance Section Styles */
+        .performance-section {
+            background: var(--bg);
+            padding: 6rem 0;
+        }
+
+        .performance-title {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        .performance-subtitle {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 4rem;
+            color: var(--muted);
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+
+        .performance-container {
+            margin: 0;
+            padding: 0;
+        }
+
+        .performance-chart-container {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 24px rgba(12, 17, 25, 0.06);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .performance-chart-container:hover {
+            box-shadow: 0 12px 30px rgba(12, 17, 25, 0.08);
+            transform: translateY(-4px);
+        }
+
+        .performance-chart {
+            width: 100%;
+
+            object-fit: contain;
+            padding: 2rem;
+            background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+        }
+
+        .performance-metrics {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .metric-card {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--surface);
+            border-radius: 12px;
+            min-width: 180px;
+            border: 1px solid var(--card-border);
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        /* Application Section Styles */
+        .application-section {
+            background: var(--surface);
+            padding: 6rem 0;
+        }
+
+        .application-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .application-subtitle {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 4rem;
+            color: var(--muted);
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+
+        .app-tabs-container {
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+            padding: 0 1rem;
+        }
+
+        .app-content {
+            display: none;
+            /* max-width: 1100px; */
+            margin: 0;
+            padding: 0;
+        }
+
+        .app-content.active {
+            display: block;
+        }
+
+        .app-content-header {
+            margin-bottom: 2rem;
+        }
+
+        .app-content-header h3 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+        }
+
+        .app-content-header.material-header h3 {
+            color: var(--app-material);
+        }
+
+        .app-content-header.refinement-header h3 {
+            color: var(--app-refinement);
+        }
+
+        .app-content-header.segmentation-header h3 {
+            color: var(--app-segmentation);
+        }
+
+        .app-content-header.part-texturing-header h3 {
+            color: var(--app-part-texturing);
+        }
+
+        .app-content-header p {
+            color: var(--muted);
+            line-height: 1.6;
+            font-size: 1.05rem;
+            max-width: 900px;
+        }
+
+        .app-images-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .app-image-container {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 24px rgba(12, 17, 25, 0.06);
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .app-image-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(12, 17, 25, 0.08);
+        }
+
+        .app-image {
+            width: 100%;
+            /* height: 380px; */
+            object-fit: contain;
+            padding: 2rem;
+            background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+        }
+
+        .app-image-caption {
+            padding: 1rem;
+            text-align: center;
+            color: var(--text);
+            font-weight: 500;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .app-single-image {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .app-split-content {
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+        }
+
+        .app-split-text {
+            flex: 1;
+            color: var(--text);
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+
+        .app-split-text p {
+            margin-bottom: 1.2rem;
+        }
+
+        .app-split-text strong {
+            color: var(--app-refinement);
+        }
+
+        .app-split-image {
+            flex: 1;
+            min-width: 350px;
+        }
+
         /* responsive tweaks */
         @media (max-width:1024px) {
             .model-viewport.h-[700px] {
                 height: 520px;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .method-image {
+                height: 250px;
+            }
+
+            .arch-content.active {
+                flex-direction: column;
+                text-align: center;
+                gap: 2rem;
+            }
+
+            .arch-image-container {
+                width: 100%;
+                max-width: 450px;
+                min-width: auto;
+            }
+
+            .arch-image {
+                height: 300px;
+            }
+
+            .performance-chart {
+                height: 400px;
+            }
+
+            .app-split-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 2rem;
+            }
+
+            .app-split-image {
+                width: 100%;
+                max-width: 450px;
+                min-width: auto;
+            }
+
+            .app-image {
+                height: 320px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .challenge-tabs {
+                flex-wrap: wrap;
+            }
+
+            .challenge-tab {
+                margin-bottom: 0.5rem;
+            }
+
+            .method-image {
+                height: 200px;
+            }
+
+            .arch-image {
+                height: 250px;
+                padding: 1rem;
+            }
+
+            .arch-text h3 {
+                font-size: 1.5rem;
+            }
+
+            .arch-tabs-container {
+                gap: 1rem;
+            }
+
+            .arch-tab {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+
+            .performance-chart {
+                height: 300px;
+                padding: 1rem;
+            }
+
+            .performance-metrics {
+                gap: 1.5rem;
+            }
+
+            .metric-value {
+                font-size: 2rem;
+            }
+
+            .application-title {
+                font-size: 2.2rem;
+            }
+
+            .app-tabs-container {
+                gap: 0.8rem;
+            }
+
+            .app-tab {
+                padding: 10px 16px;
+                font-size: 0.95rem;
+            }
+
+            .app-images-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .app-image {
+                height: 280px;
+            }
+
+            .app-content-header h3 {
+                font-size: 1.6rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .arch-image-container {
+                max-width: 100%;
+            }
+
+            .arch-image {
+                height: 200px;
+            }
+
+            .performance-chart {
+                height: 250px;
+            }
+
+            .metric-card {
+                width: 100%;
+                max-width: 250px;
+            }
+
+            .application-title {
+                font-size: 1.8rem;
+            }
+
+            .app-image {
+                height: 220px;
+                padding: 1rem;
+            }
+
+            .app-content-header h3 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+
+    <style>
+        @keyframes rainbow {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            100% {
+                background-position: 100% 50%;
             }
         }
     </style>
@@ -243,8 +865,18 @@
         <div class="max-w-6xl mx-auto px-6 text-center fade-in">
             <span class="text-sm text-slate-500 tracking-wide">INTRODUCING</span>
             <h1 class="text-8xl md:text-8xl font-extrabold mt-4 neon-text">NaTex</h1>
-            <p class="mt-4 text-3xl text-slate-700 max-w-3xl mx-auto">
-                Seamless Texture Generation as <br> <strong>Latent Color Diffusion</strong>
+            <p class="mt-4 text-5xl text-slate-700 max-w-3xl mx-auto" style="line-height: 1.1;">
+                Seamless Texture Generation as <br>
+                <strong style="
+        background: linear-gradient(90deg, 
+            #ff0000, #ff9900, #ffff00, #33cc33, 
+            #3399ff, #9933ff, #ff33cc, #ff0000);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        background-size: 600% 100%;
+        animation: rainbow 15s linear infinite;
+    ">Latent Color Diffusion</strong>
             </p>
             <!-- <p class="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
                  Seamless Texture Generation as <strong>Latent Color Diffusion</strong>
@@ -256,7 +888,7 @@
                     Zeqiang Lai<sup>1,2★</sup>, Yunfei Zhao<sup>2★</sup>,
                     Zibo Zhao<sup>2</sup>, Xin Yang<sup>2</sup><br>
                     Xin Huang<sup>2</sup>, Jingwei Huang<sup>2</sup>,
-                    Chunchao Guo<sup>2†</sup>, Xiangyu Yue<sup>1†</sup>
+                    Xiangyu Yue<sup>2†</sup>, Chunchao Guo<sup>1†</sup>
                 </p>
 
                 <p class="mt-2 text-slate-500"><sup>1</sup>MMLab, CUHK &nbsp; · &nbsp; <sup>2</sup>Tencent Hunyuan</p>
@@ -264,20 +896,22 @@
 
             <!-- Buttons -->
             <div class="mt-10 flex flex-wrap justify-center gap-4">
-                <a href="#" class="btn-outline">Technical Report</a>
-                <a href="https://github.com/Zeqiang-Lai/NaTex" target="_blank" class="btn-outline flex items-center">
+                <a href="#" class="btn-outline flex items-center">
+                    <i class="ai ai-arxiv mr-2 text-lg"></i> Technical Report
+                </a>
+                <a href="https://github.com/lattice3d" target="_blank" class="btn-outline flex items-center">
                     <i class="fab fa-github mr-2"></i> GitHub
                 </a>
-                <a href="#models" class="btn-solid">Browse Gallery</a>
+                <!-- <a href="#models" class="btn-solid">Browse Gallery</a> -->
             </div>
         </div>
     </section>
 
     <!-- TEASER SECTION -->
     <section id="teaser" class="py-20 bg-white ">
-        <div class="max-w-6xl mx-auto text-center px-10">
+        <div class="max-w-6xl mx-auto text-center px-6">
             <div class="mb-12 fade-in">
-                <h2 class="text-xl font-bold mb-4">Meet Native Texture Synthesis</h2>
+                <h2 class="text-3xl font-bold mb-4">Meet Native Texture Synthesis</h2>
                 <p class="max-w-2xl text-gray-500 mx-auto">
                     Generate coherent, seamless materials and textures directly in 3D space.
                 </p>
@@ -285,7 +919,7 @@
 
             <div class="relative rounded-xl overflow-hidden">
                 <!-- Replace with teaser video or 3D viewer -->
-                <img src="statics/images/teaser.jpg" alt="NaTex teaser" class="w-full h-auto object-cover">
+                <img src="statics/images/material.jpg" alt="NaTex teaser" class="w-full h-auto object-cover">
 
                 <!-- Optional overlay text -->
                 <div class="absolute bottom-6 left-6 text-left">
@@ -299,6 +933,320 @@
     </section>
 
 
+    <!-- CHALLENGES SECTION (替换原来的FEATURES) -->
+    <section id="challenges" class="py-16 bg-white">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold">Key Challenges in 3D Texture Synthesis</h2>
+                <p class="text-slate-600 mt-2">Comparing NaTex with previous Multi-View Diffusion (MVD) methods on core
+                    challenges</p>
+            </div>
+
+            <!-- Challenge Tabs -->
+            <div class="flex justify-center mb-10 gap-4 flex-wrap challenge-tabs">
+                <button class="challenge-tab active" data-challenge="occlusion">Occlusion</button>
+                <button class="challenge-tab" data-challenge="alignment">Alignment</button>
+                <button class="challenge-tab" data-challenge="coherence">Coherence</button>
+            </div>
+
+            <!-- Occlusion Challenge -->
+            <div class="challenge-content active" data-challenge="occlusion">
+                <p class="challenge-description text-lg">
+                    <strong>Challenge:</strong> Occlusion regions are an inevitable aspect of multi-view texturing; no
+                    matter the approach, they cannot be entirely avoided.
+                </p>
+
+                <div class="comparison-grid">
+                    <!-- MVD Method -->
+                    <div class="method-card mvd">
+                        <div class="method-header mvd">MVD (Previous Method)</div>
+                        <img src="statics/images/challenges/occlusion_mv.png" alt="MVD Occlusion Result"
+                            class="method-image">
+                        <p class="method-caption">Inconsistent texture in occluded regions (white arrows). Visible
+                            discontinuities between overlapping surfaces.</p>
+                    </div>
+
+                    <!-- NaTex Method -->
+                    <div class="method-card natex">
+                        <div class="method-header natex">NaTex (Our Method)</div>
+                        <img src="statics/images/challenges/occlusion_natex.png" alt="NaTex Occlusion Result"
+                            class="method-image">
+                        <p class="method-caption">Seamless texture continuity across occluded regions. Consistent color
+                            and pattern throughout the entire surface.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alignment Challenge -->
+            <div class="challenge-content" data-challenge="alignment">
+                <p class="challenge-description text-lg">
+                    <strong>Challenge:</strong> MVDs have difficulties in achieving precise alignment of texture
+                    features with fine-grained geometric details.
+                </p>
+
+                <div class="comparison-grid">
+                    <!-- MVD Method -->
+                    <div class="method-card mvd">
+                        <div class="method-header mvd">MVD (Previous Method)</div>
+                        <img src="statics/images/challenges/alignment_mv.png" alt="MVD Alignment Result"
+                            class="method-image">
+                        <p class="method-caption">Pattern misalignment and
+                            color discontinuities at object boundaries.</p>
+                    </div>
+
+                    <!-- NaTex Method -->
+                    <div class="method-card natex">
+                        <div class="method-header natex">NaTex (Our Method)</div>
+                        <img src="statics/images/challenges/alignment_natex.png" alt="NaTex Alignment Result"
+                            class="method-image">
+                        <p class="method-caption">Native texture generation ensures seamless alignment. No notable seams
+                            between object boundaries.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coherence Challenge -->
+            <div class="challenge-content" data-challenge="coherence">
+                <p class="challenge-description text-lg">
+                    <strong>Challenge:</strong> Maintaining consistency across multiple views is a costly process, and
+                    even state-of-the-art video models struggle to achieve satisfactory results in this regard.
+                </p>
+
+                <div class="comparison-grid">
+                    <!-- MVD Method -->
+                    <div class="method-card mvd">
+                        <div class="method-header mvd">MVD (Previous Method)</div>
+                        <img src="statics/images/challenges/coherence_mv.png" alt="MVD Coherence Result"
+                            class="method-image">
+                        <p class="method-caption">Fragmented texture patterns. Inconsistent color across the model
+                            surface.</p>
+                    </div>
+
+                    <!-- NaTex Method -->
+                    <div class="method-card natex">
+                        <div class="method-header natex">NaTex (Our Method)</div>
+                        <img src="statics/images/challenges/coherence_natex.png" alt="NaTex Coherence Result"
+                            class="method-image">
+                        <p class="method-caption">Global texture coherence. Uniform and consistent
+                            color across the entire model.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Note -->
+            <div class="mt-8 text-center text-sm text-slate-500">
+                <p>All results are generated with the same input image and geometry. Images are cropped to
+                    highlight key differences.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 新增的 Architecture Section (Tab 切换版) -->
+    <section id="architecture" class="architecture-section py-20">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-8">Latent Color Diffusion Model</h2>
+
+                <p class="application-subtitle">
+                    NaTex directly predicts RGB color for given 3D coordinates via a latent
+                    diffusion approach, a paradigm that has shown remarkable effectiveness in image, video,
+                    and 3D shape generation, yet unexplored for texture generation.
+                </p>
+
+            </div>
+
+            <!-- Architecture Tabs -->
+            <div class="arch-tabs-container">
+                <button class="arch-tab vae-tab active" data-arch="vae">Geometry-awared Color Variational Autoencoder
+                    (VAE)</button>
+                <button class="arch-tab dit-tab" data-arch="dit">Multi-Control Color Diffusion Transformer
+                    (DiT)</button>
+            </div>
+
+            <!-- VAE Content -->
+            <div class="arch-content active" data-arch="vae">
+                <div class="arch-text vae-text">
+                    <h3>Geometry-awared Color VAE</h3>
+
+                    <p>To mitigate the computational challenges of performing diffusion directly on a dense point cloud,
+                        we propose a color point cloud Variational Autoencoder (VAE) with a similar architecture to
+                        3DShape2VecSet. Unlike 3DShape2VecSet, which focuses on shape autoencoding, our model
+                        operates on color point clouds. </p>
+                    <p class="mt-4"> We design a dual-branch VAE that extends the color VAE with an additional geometry
+                        branch, encoding shape cues to guide color latent compression. In this way, geometry tokens are
+                        deeply intertwined with color tokens, enabling stronger geometric guidance during color
+                        generation at test time.
+                    </p>
+                    <p class="mt-4 font-medium text-vae-purple">Together, these adaptations yield an efficient
+                        autoencoder that achieves
+                        over 80× compression, enabling efficient scaling for subsequent diffusion transformer (DiT)
+                        generation.</p>
+                </div>
+                <div class="arch-image-container">
+                    <img src="statics/images/vae.jpg" alt="VAE Architecture Diagram" class="arch-image">
+                </div>
+            </div>
+
+            <!-- DiT Content -->
+            <div class="arch-content" data-arch="dit">
+                <div class="arch-text dit-text">
+                    <h3>Multi-Control Color DiT</h3>
+                    <p>We introduce a multi-control color DiT that flexibly accommodates different control signals. We
+                        integrate precise surface hints into DiT via pairwise conditional geometry tokens, implemented
+                        through positional embeddings and channel-wise concatenation.
+                    </p>
+                    <p class="mt-4">Our
+                        design enables a wide range of applications beyond image-conditioned texture generation (with
+                        geometry and image controls) to textureconditioned material generation and texture refinement
+                        (using an initial texture, named as color control). Notably, NaTex exhibits remarkable
+                        generalization capability, enabling image-conditioned part segmentation and texturing even in a
+                        training-free manner.</p>
+                    <p class="mt-4 font-medium text-dit-cyan">Key Advantage: Global context modeling for 3D-aware
+                        texture synthesis</p>
+                </div>
+                <div class="arch-image-container">
+                    <img src="statics/images/dit.jpg" alt="DiT Architecture Diagram" class="arch-image">
+                </div>
+            </div>
+
+            <!-- 图片说明 -->
+            <div class="mt-8 text-center text-sm text-slate-500">
+                <p>Click on the tabs above to switch between VAE and DiT architecture details.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 新增的 Performance Section -->
+    <section id="performance" class="performance-section">
+        <div class="max-w-6xl mx-auto px-6">
+            <h2 class="performance-title">Performance Benchmark</h2>
+            <p class="performance-subtitle">
+                NaTex outperforms state-of-the-art methods in texture alignment and coherence and occlusion handling.
+            </p>
+
+            <div class="performance-container">
+                <!-- 性能图表 -->
+                <div class="performance-chart-container">
+                    <img src="statics/images/generation.jpg" alt="NaTex Performance Benchmark"
+                        class="performance-chart">
+                </div>
+
+
+                <!-- 性能说明 -->
+                <div class="mt-6 text-center text-sm text-slate-500">
+                    <p>Commercial models use their own geometries, while other methods share the same geometry from
+                        Hunyuan3D 2.5. All methods are rendered with albedo only.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 新增的 Application Section -->
+    <section id="applications" class="application-section">
+        <div class="max-w-6xl mx-auto px-6">
+            <h2 class="application-title">Go beyond Texture Generation</h2>
+            <p class="application-subtitle">
+                Broader Application of NaTex. Explore how our technology extends to various 3D content creation tasks.
+            </p>
+
+            <!-- Application Tabs -->
+            <div class="app-tabs-container">
+                <button class="app-tab material-tab active" data-app="material">Material Generation</button>
+                <button class="app-tab refinement-tab" data-app="refinement">Texture Refinement</button>
+                <button class="app-tab segmentation-tab" data-app="segmentation">Part Segmentation</button>
+                <button class="app-tab part-texturing-tab" data-app="part-texturing">Part Texturing</button>
+            </div>
+
+            <!-- Material Generation Content -->
+            <div class="app-content active" data-app="material">
+                <div class="app-content-header material-header">
+                    <h3>Material Generation</h3>
+                    <p>Generate high-fidelity, physically plausible materials with realistic textures and properties.
+                        NaTex's latent color diffusion framework could be readily extended for capturing material
+                        characteristics like roughness and metallic.</p>
+                </div>
+                <div class="app-images-grid">
+                    <div class="app-image-container">
+                        <img src="statics/images/case_study.jpg" alt="Metal Material Generation" class="app-image">
+                        <div class="app-image-caption">Illustration of our material generation results from a case
+                            study, with individual components visualized separately.</div>
+                    </div>
+                    <div class="app-image-container">
+                        <img src="statics/images/envs.jpg" alt="Fabric Material Generation" class="app-image">
+                        <div class="app-image-caption">Illustration of our material generation results under different
+                            lightings, rendered using various environment maps.</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Texture Refinement Content -->
+            <div class="app-content" data-app="refinement">
+                <div class="app-content-header refinement-header">
+                    <h3>Texture Refinement</h3>
+                </div>
+                <div class="app-split-content">
+                    <div class="app-split-text">
+                        <p>Our model with color control can be viewed as a neural refiner that automatically inpaints
+                            occluded regions and corrects texture. M</p>
+                        <p>Moreover, thanks to the strong conditioning, it can
+                            performs the process in just five steps, making it extremely fast and efficient for a wide
+                            range of downstream tasks that require intelligent refinement.</p>
+                    </div>
+                    <div class="app-split-image">
+                        <div class="app-image-container">
+                            <img src="statics/images/refinement.jpg" alt="Texture Refinement Result" class="app-image">
+                            <div class="app-image-caption">Illustration of texture refinement using NaTex with color
+                                control.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part Segmentation Content -->
+            <div class="app-content" data-app="segmentation">
+                <div class="app-content-header segmentation-header">
+                    <h3>Part Segmentation</h3>
+                    <p>Without any additional training, our model can be easily adapted for part segmentation tasks.
+                        This can be achieved by feeding 2D segmentation of the input image into the model, allowing it
+                        to generate texture map that align with 3D part segmentation results.</p>
+                </div>
+                <div class="app-single-image">
+                    <div class="app-image-container">
+                        <img src="statics/images/partseg.jpg" alt="Part Segmentation Result" class="app-image">
+                        <div class="app-image-caption">Visual results of part segmentation using NaTex without any
+                            additional training.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part Texturing Content -->
+            <div class="app-content" data-app="part-texturing">
+                <div class="app-content-header part-texturing-header">
+                    <h3>Part Texturing</h3>
+                    <p>Within our native texture framework, part generation is as straightforward as generating textures
+                        for the entire object, as we can predict color directly in 3D space for different part surfaces.
+                    </p>
+                </div>
+                <div class="app-images-grid">
+                    <div class="app-image-container">
+                        <img src="statics/images/part_texture_case.jpg" alt="Furniture Part Texturing"
+                            class="app-image">
+                        <div class="app-image-caption">IIllustration of part texturing using NaTex without any
+                            additional training.</div>
+                    </div>
+                    <div class="app-image-container">
+                        <img src="statics/images/part_texture.jpg" alt="Character Part Texturing" class="app-image">
+                        <div class="app-image-caption">Visual examples of additional part texturing results generated by
+                            NaTex.</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
     <!-- CTA -->
     <section id="get-started" class="py-20">
         <div class="max-w-4xl mx-auto px-6 text-center">
@@ -310,134 +1258,66 @@
         </div>
     </section>
 
-    <!-- Modal (detail view) -->
-    <div id="model-modal" class="modal" aria-hidden="true">
-        <div class="modal-content p-6 relative">
-            <button class="close-modal" id="close-modal">&times;</button>
-            <div class="flex h-full gap-6">
-                <div class="w-3/4 h-full flex flex-col gap-4">
-                    <div class="model-viewport flex-grow">
-                        <model-viewer id="modal-viewer" camera-controls auto-rotate shadow-intensity="0.0"
-                            exposure="0.5" environment-image="neutral"
-                            style="width:100%;height:100%;background-color:transparent"></model-viewer>
-                    </div>
-                </div>
-                <div class="w-1/4 h-full flex flex-col gap-4">
-                    <div class="reference-image-container" style="height:40%;">
-                        <img id="reference-image" src="" alt="Reference"
-                            class="w-full h-full object-contain rounded-lg" />
-                    </div>
-                    <div class="model-details">
-                        <h2 id="modal-title" class="text-xl font-bold mb-2"></h2>
-                        <p id="modal-description" class="text-slate-600 text-sm"></p>
-
-                        <div class="mt-4 grid grid-cols-1 gap-2 text-xs text-slate-600">
-                            <div>
-                                <p class="text-slate-400">Category</p>
-                                <p id="modal-category" class="text-slate-800"></p>
-                            </div>
-                            <div>
-                                <p class="text-slate-400">Atlas</p>
-                                <p id="modal-polygons" class="text-slate-800"></p>
-                            </div>
-                            <div>
-                                <p class="text-slate-400">Materials</p>
-                                <p id="modal-textures" class="text-slate-800"></p>
-                            </div>
-                        </div>
-
-                        <button class="w-full btn-solid mt-6">Download</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script src="statics/js/model_zoo.js"></script>
     <script src="statics/js/zoo.js"></script>
     <!-- scripts -->
     <script>
-        // Simple tabs
-        document.querySelectorAll('.feature-tab').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.feature-tab').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
 
-                const tab = btn.getAttribute('data-tab');
-                document.querySelectorAll('.tab-content').forEach(tc => {
-                    if (tc.dataset.tab === tab) {
-                        tc.classList.remove('hidden');
+        // Challenge tab switching
+        document.querySelectorAll('.challenge-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Update tab active state
+                document.querySelectorAll('.challenge-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Show corresponding challenge content
+                const challenge = tab.getAttribute('data-challenge');
+                document.querySelectorAll('.challenge-content').forEach(content => {
+                    if (content.dataset.challenge === challenge) {
+                        content.classList.add('active');
                     } else {
-                        tc.classList.add('hidden');
+                        content.classList.remove('active');
                     }
                 });
             });
         });
 
-        // Clickable case selectors to load a placeholder into model-viewer
-        document.querySelectorAll('.case-selector').forEach(cs => {
-            cs.addEventListener('click', () => {
-                const model = cs.dataset.model || '';
-                const viewer = document.getElementById('feature-viewer');
-                // put your model path mapping here
-                const mapping = {
-                    'angel': 'statics/meshes/angel.glb',
-                    'fabric': 'statics/meshes/fabric.glb',
-                    'metal': 'statics/meshes/metal.glb'
-                };
-                if (mapping[model]) viewer.setAttribute('src', mapping[model]);
+        // Architecture tab switching
+        document.querySelectorAll('.arch-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Update tab active state
+                document.querySelectorAll('.arch-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Show corresponding architecture content
+                const arch = tab.getAttribute('data-arch');
+                document.querySelectorAll('.arch-content').forEach(content => {
+                    if (content.dataset.arch === arch) {
+                        content.classList.add('active');
+                    } else {
+                        content.classList.remove('active');
+                    }
+                });
             });
         });
 
-        // curve point click -> load model
-        document.querySelectorAll('.curve-points circle').forEach(c => {
-            c.style.cursor = 'pointer';
-            c.addEventListener('click', () => {
-                const id = c.dataset.model;
-                const mapping = {
-                    'm1': 'statics/meshes/low.glb',
-                    'm2': 'statics/meshes/med.glb',
-                    'm3': 'statics/meshes/high.glb',
-                    'm4': 'statics/meshes/ultra.glb'
-                };
-                const mv = document.getElementById('scaling-viewer');
-                if (mapping[id]) mv.setAttribute('src', mapping[id]);
-            });
-        });
+        // Application tab switching
+        document.querySelectorAll('.app-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Update tab active state
+                document.querySelectorAll('.app-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
 
-        // modal open/close (example)
-        document.querySelectorAll('#model-grid .model-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const modal = document.getElementById('model-modal');
-                modal.classList.add('open');
-                modal.setAttribute('aria-hidden', 'false');
-                // set preview content if needed
-            });
-        });
-        document.getElementById('close-modal').addEventListener('click', () => {
-            const modal = document.getElementById('model-modal');
-            modal.classList.remove('open');
-            modal.setAttribute('aria-hidden', 'true');
-        });
-
-        // pagination placeholders
-        let currentPage = 1, totalPages = 1;
-        document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
-        document.getElementById('prev-page').addEventListener('click', () => {
-            if (currentPage > 1) currentPage--;
-            document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
-        });
-        document.getElementById('next-page').addEventListener('click', () => {
-            if (currentPage < totalPages) currentPage++;
-            document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
-        });
-
-        // basic view-mode switching in modal
-        document.querySelectorAll('.view-mode').forEach(vm => {
-            vm.addEventListener('click', () => {
-                document.querySelectorAll('.view-mode').forEach(x => x.classList.remove('active'));
-                vm.classList.add('active');
-                // implement mode switching (albedo/normal/textured) if you have separate glb or material variants
+                // Show corresponding application content
+                const app = tab.getAttribute('data-app');
+                document.querySelectorAll('.app-content').forEach(content => {
+                    if (content.dataset.app === app) {
+                        content.classList.add('active');
+                    } else {
+                        content.classList.remove('active');
+                    }
+                });
             });
         });
 
